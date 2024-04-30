@@ -1,15 +1,55 @@
 package com.example.pinecone.pineconedemo;
 
+import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
-import org.openapitools.client.model.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class PineconedemoApplication {
 
 	private static final String PINECONE_API_KEY = "PINECONE_API_KEY";
+	public static final String DOCS_QUICKSTART_INDEX = "docs-quickstart-index";
 
-	public static void main(String[] args) {
-		Pinecone pc = new Pinecone.Builder(System.getenv(PINECONE_API_KEY)).build();
-		pc.createServerlessIndex("docs-quickstart-index", "cosine", 8, "aws", "us-east-1");
+	private static Pinecone pineconeClientInstance ;
+
+	public static void main(String[] args) throws InterruptedException {
+		Pinecone pc = getPineConeClientInstance();
+		pc.createServerlessIndex(DOCS_QUICKSTART_INDEX, "cosine", 8, "aws", "us-east-1");
+        Thread.sleep(10000);
+
+		List<Float> values1 = Arrays.asList(0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f);
+		List<Float> values2 = Arrays.asList(0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f);
+		List<Float> values3 = Arrays.asList(0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f, 0.3f);
+		List<Float> values4 = Arrays.asList(0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f, 0.4f);
+		List<Float> values5 = Arrays.asList(0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f);
+		List<Float> values6 = Arrays.asList(0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f, 0.6f);
+		List<Float> values7 = Arrays.asList(0.7f, 0.7f, 0.7f, 0.7f, 0.7f, 0.7f, 0.7f, 0.7f);
+		List<Float> values8 = Arrays.asList(0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f);
+
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec1", values1, "ns1");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec2", values2, "ns1");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec3", values3, "ns1");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec4", values4, "ns1");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec5", values5, "ns2");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec6", values6, "ns2");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec7", values7, "ns2");
+		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec8", values8, "ns2");
 	}
 
+	private static Pinecone getPineConeClientInstance() {
+		if ((null == pineconeClientInstance)){
+			String pineconeApiKey = Optional.ofNullable(System.getenv(PINECONE_API_KEY))
+					.orElseThrow(
+							() -> new NullPointerException("pineconeApiKey is not set in the environment"));
+			pineconeClientInstance = new Pinecone.Builder(pineconeApiKey).build();
+		}
+		return pineconeClientInstance;
+	}
+
+	public static int upsertVectorInIndex(String indexName, String id, List<Float> vectorList, String namespace){
+		Index index = getPineConeClientInstance().getIndexConnection(indexName);
+		return index.upsert(id, vectorList, namespace).getUpsertedCount();
+	}
 }
