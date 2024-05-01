@@ -2,6 +2,8 @@ package com.example.pinecone.pineconedemo;
 
 import io.pinecone.clients.Index;
 import io.pinecone.clients.Pinecone;
+import io.pinecone.proto.DescribeIndexStatsResponse;
+import org.openapitools.client.model.IndexList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,7 @@ public class PineconedemoApplication {
 	public static void main(String[] args) throws InterruptedException {
 		Pinecone pc = getPineConeClientInstance();
 		pc.createServerlessIndex(DOCS_QUICKSTART_INDEX, "cosine", 8, "aws", "us-east-1");
+		System.out.println("Waiting 1 min after creating index  "+DOCS_QUICKSTART_INDEX);
         Thread.sleep(10000);
 
 		List<Float> values1 = Arrays.asList(0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f);
@@ -36,6 +39,21 @@ public class PineconedemoApplication {
 		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec6", values6, "ns2");
 		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec7", values7, "ns2");
 		upsertVectorInIndex(DOCS_QUICKSTART_INDEX,"vec8", values8, "ns2");
+
+		IndexList indexList = pc.listIndexes();
+		System.out.println("Index List "+indexList.toJson()+"\n\n");
+		printIndexStats(DOCS_QUICKSTART_INDEX);
+		System.out.println("\nWaiting 5 min before delete index  : "+DOCS_QUICKSTART_INDEX);
+		Thread.sleep(50000);
+
+		//Index cleanup to release resources
+		pc.deleteIndex(DOCS_QUICKSTART_INDEX);
+	}
+
+	private static void printIndexStats(String indexName) {
+		Index index = getPineConeClientInstance().getIndexConnection(indexName);
+		DescribeIndexStatsResponse indexStatsResponse = index.describeIndexStats(null);
+		System.out.println("Index Stats :\n"+indexStatsResponse);
 	}
 
 	private static Pinecone getPineConeClientInstance() {
