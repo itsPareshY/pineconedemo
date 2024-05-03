@@ -44,6 +44,9 @@ public class PineconedemoApplication {
 		System.out.println("Index List "+indexList.toJson()+"\n\n");
 		printIndexStats(DOCS_QUICKSTART_INDEX);
 		System.out.println("\nWaiting 5 min before delete index  : "+DOCS_QUICKSTART_INDEX);
+
+
+		pc.getIndexConnection(DOCS_QUICKSTART_INDEX).update("vec8", Arrays.asList(0.9f, 0.9f, 0.9f, 0.9f, 0.9f, 0.9f, 0.9f, 0.9f),"ns2");
 		Thread.sleep(50000);
 
 		//Index cleanup to release resources
